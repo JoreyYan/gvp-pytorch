@@ -71,6 +71,8 @@ class CPDModel(torch.nn.Module):
         :param h_E: tuple (s, V) of edge embeddings
         :param seq: int `torch.Tensor` of shape [num_nodes]
         '''
+        
+        #点边自更新
         h_V = self.W_v(h_V)
         h_E = self.W_e(h_E)
         
@@ -79,6 +81,8 @@ class CPDModel(torch.nn.Module):
         
         encoder_embeddings = h_V
         
+        
+        #序列映射为20维度
         h_S = self.W_s(seq)
         h_S = h_S[edge_index[0]]
         h_S[edge_index[0] >= edge_index[1]] = 0
