@@ -172,7 +172,7 @@ class ProteinGraphDataset(data.Dataset):
             # 取出所有Cα
             X_ca = coords[:, 1]
             edge_index = torch_cluster.knn_graph(X_ca, k=self.top_k)
-            # 构建一个 30近邻的 图
+            # 构建一个 30近邻的 有向图
             
             
             pos_embeddings = self._positional_embeddings(edge_index)
@@ -190,7 +190,8 @@ class ProteinGraphDataset(data.Dataset):
             
             node_s, node_v, edge_s, edge_v = map(torch.nan_to_num,
                     (node_s, node_v, edge_s, edge_v))
-            
+            #https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data
+            # 这里很多属性是自己才有的，自定义了很多
         data = torch_geometric.data.Data(x=X_ca, seq=seq, name=name,
                                          node_s=node_s, node_v=node_v,
                                          edge_s=edge_s, edge_v=edge_v,
