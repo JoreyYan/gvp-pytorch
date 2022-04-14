@@ -324,6 +324,8 @@ class GVPConvLayer(nn.Module):
         self.dropout = nn.ModuleList([Dropout(drop_rate) for _ in range(2)])
 
         ff_func = []
+        
+        # 消息传递完再两层 GVP
         if n_feedforward == 1:
             ff_func.append(GVP_(node_dims, node_dims, activations=(None, None)))
         else:
@@ -367,7 +369,7 @@ class GVPConvLayer(nn.Module):
                         dim_size=dh[0].size(0)).clamp(min=1).unsqueeze(-1)
             
             dh = dh[0] / count, dh[1] / count.unsqueeze(-1)
-
+        #消息传递
         else:
             dh = self.conv(x, edge_index, edge_attr)
         
@@ -377,7 +379,9 @@ class GVPConvLayer(nn.Module):
             
         x = self.norm[0](tuple_sum(x, self.dropout[0](dh)))
         
+          # 消息传递完再两层 GVP
         dh = self.ff_func(x)
+        # 自己和自己的dropout结合在一起  再加一层laynorm
         x = self.norm[1](tuple_sum(x, self.dropout[1](dh)))
         
         if node_mask is not None:
