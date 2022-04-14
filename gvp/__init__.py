@@ -117,18 +117,30 @@ class GVP(nn.Module):
         if self.vi:
             s, v = x
             v = torch.transpose(v, -1, -2)
+            
+            # 先通过线性层映射到h_dim
             vh = self.wh(v)    
+            
+            #取范数
             vn = _norm_no_nan(vh, axis=-2)
+            
+            #将标量和向量连接在一起   映射到维度o  
             s = self.ws(torch.cat([s, vn], -1))
+            
+            # 
             if self.vo: 
+                # 再来源给线性层
                 v = self.wv(vh) 
                 v = torch.transpose(v, -1, -2)
                 if self.vector_gate: 
                     if self.vector_act:
+                        #自己给自己加一层带偏置的线性层
                         gate = self.wsv(self.vector_act(s))
                     else:
                         gate = self.wsv(s)
+                    #加个sig
                     v = v * torch.sigmoid(gate).unsqueeze(-1)
+                    # 原来那一版
                 elif self.vector_act:
                     v = v * self.vector_act(
                         _norm_no_nan(v, axis=-1, keepdims=True))
