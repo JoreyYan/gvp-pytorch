@@ -169,9 +169,11 @@ class ProteinGraphDataset(data.Dataset):
             
             mask = torch.isfinite(coords.sum(dim=(1,2)))
             coords[~mask] = np.inf
-            
+            # 取出所有Cα
             X_ca = coords[:, 1]
             edge_index = torch_cluster.knn_graph(X_ca, k=self.top_k)
+            # 构建一个 30近邻的 图
+            
             
             pos_embeddings = self._positional_embeddings(edge_index)
             E_vectors = X_ca[edge_index[0]] - X_ca[edge_index[1]]
@@ -243,7 +245,7 @@ class ProteinGraphDataset(data.Dataset):
         forward = F.pad(forward, [0, 0, 0, 1])
         backward = F.pad(backward, [0, 0, 1, 0])
         return torch.cat([forward.unsqueeze(-2), backward.unsqueeze(-2)], -2)
-
+    # 计算氨基酸残基与Cα的朝向
     def _sidechains(self, X):
         n, origin, c = X[:, 0], X[:, 1], X[:, 2]
         c, n = _normalize(c - origin), _normalize(n - origin)
